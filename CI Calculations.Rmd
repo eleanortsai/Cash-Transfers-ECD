@@ -1,0 +1,564 @@
+---
+title: "Effect Size Calculations"
+author: "Eleanor Tsai"
+date: "2023-09-13"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("esc")
+library(esc)
+```
+
+```{r Glass Delta 2 Function}
+# This function calculates the Glass Delta 2 from a regression coefficient and the SD of the control group
+
+calculate_glass_delta2 <- function(b, SD_control, N_treatment, N_control) {
+  # Calculate the effect size (delta)
+  delta <- b / SD_control
+  
+  # Calculate the variance of delta
+  variance_delta <- (N_treatment + N_control) / (N_treatment * N_control) + (delta^2) / (2 * (N_control - 1))
+  
+  # Calculate the standard error of delta
+  se_delta <- sqrt(variance_delta)
+  
+  # Calculate the lower and upper bounds of the confidence interval
+  lower_bound <- delta - 1.96 * se_delta # 1.96 for 95% confidence interval
+  upper_bound <- delta + 1.96 * se_delta
+  
+  # Return the delta and its confidence interval
+  formatted_result <- cat(paste0(
+    "Effect Size (Delta):", round(delta, 4),
+    "\n95% Confidence Interval: [", round(lower_bound, 4), ",", round(upper_bound, 4), "]\n"
+    )
+  )
+  
+  return(formatted_result)
+}
+```
+
+```{r SD(Y) Function}
+# This function calculates the Glass Delta 2 from a regression coefficient and its standard error, by first approximating the SD of the full sample and using it in place of the SD of the control group
+# Reference here (last formula on the page): https://handbook-5-1.cochrane.org/chapter_7/7_7_3_3_obtaining_standard_deviations_from_standard_errors.htm
+# If CIs are given, the formula for the standard error is (upper_bound-lower_bound)/3.92
+
+calculate_sdy <- function(b, SE_diff, N_treatment, N_control) {
+  # Calculate SD(Y) using the formula
+  SD_Y <- SE_diff * sqrt((N_treatment * N_control) / (N_treatment + N_control))
+  
+  # Call the Glass' Delta 2 function
+  result <- calculate_glass_delta2(b, SD_Y, N_treatment, N_control)
+  
+  # Return the result
+  return(SD_Y)
+  return(result)
+}
+
+```
+
+# Example Usage for Language IDHC-B Score from Fernald & Hidrobo 2011
+(See Table 2 and Table 3)
+```{r}
+b <- 2.43
+SD_control <- 34.2
+N_treatment <- 797
+N_control <- 399
+calculate_glass_delta2(b, SD_control, N_treatment, N_control)
+```
+
+```{r}
+b <- 2.43
+SE_diff <- 1.75
+N_treatment <- 797
+N_control <- 399
+calculate_sdy(b, SE_diff, N_treatment, N_control)
+```
+
+```{r SE to CI Function}
+get_ci <- function(std_b, SE) {
+  # This function calculates the confidence interval for a standardized regression coefficient (i.e. effect size; reported in terms of Z-score) given its standard error
+  
+  lower_bound <- std_b - (1.96 * SE)
+  upper_bound <- std_b + (1.96 * SE)
+  
+  confidence_interval <- c(round(lower_bound, 4), round(upper_bound, 4))
+  
+  return(confidence_interval)
+}
+```
+
+# Weaver et al. 2024
+## Cognitive
+```{r}
+std_b <- .09
+SE <- .04
+get_ci(std_b,SE)
+```
+## Gross Motor
+```{r}
+std_b <- .09
+SE <- .04
+get_ci(std_b,SE)
+```
+## Fine Motor
+```{r}
+std_b <- .10
+SE <- .04
+get_ci(std_b,SE)
+```
+
+# Weaver et al. 2023
+## HAZ
+```{r}
+std_b <- .06
+SE <- .05
+get_ci(std_b,SE)
+```
+## WAZ
+```{r}
+std_b <- .04
+SE <- .04
+get_ci(std_b,SE)
+```
+# Carneiro et al. 2021
+## HAZ
+```{r}
+std_b <- .135
+SE <- .061
+get_ci(std_b,SE)
+```
+## WAZ
+```{r}
+std_b <- .054
+SE <- .056
+get_ci(std_b,SE)
+```
+## WHZ
+```{r}
+std_b <- -.05
+SE <- .056
+get_ci(std_b,SE)
+```
+## Communication
+Table A8
+```{r}
+std_b <- .043
+SE <- .058
+get_ci(std_b,SE)
+```
+## Gross Motor
+Table A8
+```{r}
+std_b <- .082
+SE <- .059
+get_ci(std_b,SE)
+```
+## Personal-Social
+Table A8
+```{r}
+std_b <- -.095
+SE <- .064
+get_ci(std_b,SE)
+```
+
+# Levere et al. 2016
+## WAZ
+```{r}
+std_b <- .025
+SE <- .063
+get_ci(std_b,SE)
+```
+
+## HAZ
+```{r}
+std_b <- -.176
+SE <- .107
+get_ci(std_b,SE)
+```
+
+## WHZ
+```{r}
+std_b <- .171
+SE <- .101
+get_ci(std_b,SE)
+```
+## Communication
+```{r}
+std_b <- -.067
+SE <- .072
+get_ci(std_b,SE)
+```
+## Gross Motor
+```{r}
+std_b <- -.105
+SE <- .075
+get_ci(std_b,SE)
+```
+## Fine Motor
+```{r}
+std_b <- -.114
+SE <- .065
+get_ci(std_b,SE)
+```
+## Socioemotional
+```{r}
+std_b <- -.106
+SE <- .069
+get_ci(std_b,SE)
+```
+# Premand & Barry 2020
+## HAZ
+```{r}
+std_b <- -.117
+SE <- .064
+get_ci(std_b,SE)
+```
+
+## WHZ
+```{r}
+std_b <- .057
+SE <- .055
+get_ci(std_b,SE)
+```
+
+## WAZ
+```{r}
+std_b <- -.053
+SE <- .070
+get_ci(std_b,SE)
+```
+
+## Cognitive
+```{r}
+std_b <- -.047
+SE <- .067
+get_ci(std_b,SE)
+```
+
+## Socioemotional
+```{r}
+std_b <- -.054
+SE <- .069
+get_ci(std_b,SE)
+```
+
+# Paxson & Schady 2010
+## TVIP Score
+```{r}
+get_ci(.013,.089)
+```
+## Short-Term Memory
+```{r}
+get_ci(-.021,.098)
+```
+
+## Behavior Problems
+```{r}
+get_ci(.069,.090)
+```
+
+## Fine Motor
+```{r}
+get_ci(.105,.068)
+```
+# Macours et al. 2012
+## Language
+```{r}
+get_ci(.139,.050)
+```
+## Short-Term Memory
+```{r}
+get_ci(.156,.044)
+```
+
+## Social-Personal
+```{r}
+get_ci(.130,.047)
+```
+
+## Gross Motor
+```{r}
+get_ci(-.006,.046)
+```
+
+## Fine Motor
+```{r}
+get_ci(.038,.063)
+```
+
+# Datta et al. 2021 Control
+## Language Learning
+```{r}
+get_ci(.18,.07)
+```
+
+## Fine Motor
+```{r}
+get_ci(.09,.07)
+```
+
+## Social Skills
+```{r}
+get_ci(.03,.09)
+```
+
+# Datta et al. 2021 Arm 1
+## Language Learning
+```{r}
+get_ci(.1,.07)
+```
+
+## Fine Motor
+```{r}
+get_ci(-.03,.08)
+```
+
+## Social Skills
+```{r}
+get_ci(.12,.09)
+```
+
+
+# Datta et al. 2021 Arm 2
+## Language Learning
+```{r}
+get_ci(.09,.07)
+```
+
+## Fine Motor
+```{r}
+get_ci(-.05,.08)
+```
+
+## Social Skills
+```{r}
+get_ci(.11,.09)
+```
+
+
+# Datta et al. 2021 Arm 3
+## Language Learning
+```{r}
+get_ci(.09,.08)
+```
+
+## Fine Motor
+```{r}
+get_ci(-.04,.08)
+```
+
+## Social Skills
+```{r}
+get_ci(.18,.08)
+```
+
+
+# Ozer et al. 2009
+## Behavior Problems Index
+```{r}
+calculate_glass_delta2(.71,4.20,702,243)
+```
+# Wong et al. 2013
+## Cognitive Skills
+```{r}
+get_ci(-.32,.17)
+```
+
+## Language Skills
+```{r}
+get_ci(.25,.24)
+```
+
+## Level of Self-Management
+```{r}
+get_ci(.1,.27)
+```
+
+## Motor Skills of Hands
+```{r}
+get_ci(-.02,.23)
+```
+
+## Overall Physical Capacity
+```{r}
+get_ci(.11,.19)
+```
+
+# Lopez-Boo & Creamer 2019 Education
+## Communication
+```{r}
+get_ci(.141,.072)
+```
+
+## Gross Motor
+```{r}
+get_ci(.022,.080)
+```
+
+## Personal-Social
+```{r}
+get_ci(.076,.071)
+```
+
+## Problem-Solving
+```{r}
+get_ci(.082,.087)
+```
+
+# Lopez-Boo & Creamer 2019 Health
+## Communication
+```{r}
+get_ci(.362,.120)
+```
+
+## Gross Motor
+```{r}
+get_ci(.127,.154)
+```
+
+## Personal-Social
+```{r}
+get_ci(.351,.118)
+```
+
+## Problem-Solving
+```{r}
+get_ci(.519,.161)
+```
+
+
+# Gaentzsch 2019
+## PPVT
+Table 7 Younger Cohort
+```{r}
+get_ci(-.232,.178)
+```
+
+## Maths
+Table 7 Younger Cohort
+```{r}
+get_ci(-.611,.231)
+```
+
+
+# Sanchez et al. 2020 Younger Siblings
+Table 2
+## PPVT
+```{r}
+get_ci(.207,.116)
+```
+
+# Sanchez et al. 2020 Older Siblings
+Table 2
+## PPVT
+```{r}
+get_ci(-.022,.115)
+```
+
+
+# Bouguen & Dillon 2024 T1
+## MELQO Cognitive Endline
+```{r}
+get_ci(-.045,.061)
+```
+## MELQO Language Endline
+```{r}
+get_ci(-.104,.087)
+```
+## MELQO Fine Motor Endline
+```{r}
+get_ci(.018,.104)
+```
+## CREDI Motor (Gross Motor & Fine Motor) Follow-Up
+```{r}
+get_ci(.021,.069)
+```
+## CREDI Socioemotional Follow-Up
+```{r}
+get_ci(0,.068)
+```
+
+# Bouguen & Dillon 2024 T2
+## MELQO Cognitive Endline
+```{r}
+get_ci(.062,.077)
+```
+## MELQO Language Endline
+```{r}
+get_ci(-.063,.100)
+```
+## MELQO Fine Motor Endline
+```{r}
+get_ci(-.118,.114)
+```
+## CREDI Motor (Gross Motor & Fine Motor) Follow-Up
+```{r}
+get_ci(-.043,.076)
+```
+## CREDI Socioemotional Follow-Up
+```{r}
+get_ci(-.047,.074)
+```
+
+
+# Bouguen & Dillon 2024 T3
+## MELQO Cognitive Endline
+```{r}
+get_ci(.010,.078)
+```
+## MELQO Language Endline
+```{r}
+get_ci(-.088,.088)
+```
+## MELQO Fine Motor Endline
+```{r}
+get_ci(.191,.096)
+```
+## CREDI Motor (Gross Motor & Fine Motor) Follow-Up
+```{r}
+get_ci(.135,.070)
+```
+## CREDI Socioemotional Follow-Up
+```{r}
+get_ci(.133,.070)
+```
+
+
+# Bjorvatn et al. 2023 T2
+## Emergent Literacy
+```{r}
+get_ci(.06,.06)
+```
+## Emergent Numeracy
+```{r}
+get_ci(.08,.06)
+```
+## Socioemotional
+```{r}
+get_ci(.01,.07)
+```
+## Motor (Gross Motor & Fine Motor)
+```{r}
+get_ci(.11,.06)
+```
+
+
+# Bjorvatn et al. 2023 T3
+## Emergent Literacy
+```{r}
+get_ci(.16,.06)
+```
+## Emergent Numeracy
+```{r}
+get_ci(.1,.06)
+```
+## Socioemotional
+```{r}
+get_ci(.04,.07)
+```
+## Motor (Gross Motor & Fine Motor)
+```{r}
+get_ci(.19,.06)
+```
